@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1783662068242,
+      "tag": "0000_yellow_tag",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785823570395,
+      "tag": "0001_bored_dorian_gray",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786076741978,
+      "tag": "0002_funny_toxin",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786285427485,
+      "tag": "0003_pretty_leo",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786285427490,
+      "tag": "0004_rename_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786285427500,
+      "tag": "0005_add_unit_price",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786285427510,
+      "tag": "0006_add_audit_columns",
+      "breakpoints": true
+    }
+  ]
+}

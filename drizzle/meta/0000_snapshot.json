@@ -1,0 +1,855 @@
+{
+  "id": "adb0701d-d0aa-4493-98e9-66dd95e9d90e",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.d_cpm_clients": {
+      "name": "d_cpm_clients",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "client_type": {
+          "name": "client_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "organization_name": {
+          "name": "organization_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "office_id": {
+          "name": "office_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "d_cpm_clients_office_id_d_cpm_offices_id_fk": {
+          "name": "d_cpm_clients_office_id_d_cpm_offices_id_fk",
+          "tableFrom": "d_cpm_clients",
+          "tableTo": "d_cpm_offices",
+          "columnsFrom": [
+            "office_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.d_cpm_items": {
+      "name": "d_cpm_items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "item_name": {
+          "name": "item_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "d_cpm_items_item_name_unique": {
+          "name": "d_cpm_items_item_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "item_name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bridge_cpm_meal_periods": {
+      "name": "bridge_cpm_meal_periods",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "order_day_id": {
+          "name": "order_day_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "menu_id": {
+          "name": "menu_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pax": {
+          "name": "pax",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rate": {
+          "name": "rate",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bridge_cpm_meal_periods_order_day_id_bridge_cpm_order_days_id_fk": {
+          "name": "bridge_cpm_meal_periods_order_day_id_bridge_cpm_order_days_id_fk",
+          "tableFrom": "bridge_cpm_meal_periods",
+          "tableTo": "bridge_cpm_order_days",
+          "columnsFrom": [
+            "order_day_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "bridge_cpm_meal_periods_menu_id_d_cpm_menus_id_fk": {
+          "name": "bridge_cpm_meal_periods_menu_id_d_cpm_menus_id_fk",
+          "tableFrom": "bridge_cpm_meal_periods",
+          "tableTo": "d_cpm_menus",
+          "columnsFrom": [
+            "menu_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bridge_cpm_menu_items": {
+      "name": "bridge_cpm_menu_items",
+      "schema": "",
+      "columns": {
+        "menu_id": {
+          "name": "menu_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bridge_cpm_menu_items_menu_id_d_cpm_menus_id_fk": {
+          "name": "bridge_cpm_menu_items_menu_id_d_cpm_menus_id_fk",
+          "tableFrom": "bridge_cpm_menu_items",
+          "tableTo": "d_cpm_menus",
+          "columnsFrom": [
+            "menu_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "bridge_cpm_menu_items_item_id_d_cpm_items_id_fk": {
+          "name": "bridge_cpm_menu_items_item_id_d_cpm_items_id_fk",
+          "tableFrom": "bridge_cpm_menu_items",
+          "tableTo": "d_cpm_items",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "bridge_cpm_menu_items_menu_id_item_id_pk": {
+          "name": "bridge_cpm_menu_items_menu_id_item_id_pk",
+          "columns": [
+            "menu_id",
+            "item_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.d_cpm_menus": {
+      "name": "d_cpm_menus",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "base_rate": {
+          "name": "base_rate",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "d_cpm_menus_title_unique": {
+          "name": "d_cpm_menus_title_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "title"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.d_cpm_offices": {
+      "name": "d_cpm_offices",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "office_name": {
+          "name": "office_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "d_cpm_offices_office_name_unique": {
+          "name": "d_cpm_offices_office_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "office_name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.bridge_cpm_order_days": {
+      "name": "bridge_cpm_order_days",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_date": {
+          "name": "event_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "bridge_cpm_order_days_order_id_f_cpm_orders_id_fk": {
+          "name": "bridge_cpm_order_days_order_id_f_cpm_orders_id_fk",
+          "tableFrom": "bridge_cpm_order_days",
+          "tableTo": "f_cpm_orders",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "bridge_cpm_order_days_order_id_event_date_key": {
+          "name": "bridge_cpm_order_days_order_id_event_date_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "order_id",
+            "event_date"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.f_cpm_order_history": {
+      "name": "f_cpm_order_history",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "from_status_id": {
+          "name": "from_status_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "to_status_id": {
+          "name": "to_status_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "changed_by_user_id": {
+          "name": "changed_by_user_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "remarks": {
+          "name": "remarks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "f_cpm_order_history_order_id_f_cpm_orders_id_fk": {
+          "name": "f_cpm_order_history_order_id_f_cpm_orders_id_fk",
+          "tableFrom": "f_cpm_order_history",
+          "tableTo": "f_cpm_orders",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "f_cpm_order_history_from_status_id_d_cpm_order_status_id_fk": {
+          "name": "f_cpm_order_history_from_status_id_d_cpm_order_status_id_fk",
+          "tableFrom": "f_cpm_order_history",
+          "tableTo": "d_cpm_order_status",
+          "columnsFrom": [
+            "from_status_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "f_cpm_order_history_to_status_id_d_cpm_order_status_id_fk": {
+          "name": "f_cpm_order_history_to_status_id_d_cpm_order_status_id_fk",
+          "tableFrom": "f_cpm_order_history",
+          "tableTo": "d_cpm_order_status",
+          "columnsFrom": [
+            "to_status_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.d_cpm_order_status": {
+      "name": "d_cpm_order_status",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "status_name": {
+          "name": "status_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "d_cpm_order_status_status_name_unique": {
+          "name": "d_cpm_order_status_status_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "status_name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.f_cpm_orders": {
+      "name": "f_cpm_orders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "client_id": {
+          "name": "client_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "venue_id": {
+          "name": "venue_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "custom_delivery_address": {
+          "name": "custom_delivery_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "service_type_id": {
+          "name": "service_type_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status_id": {
+          "name": "status_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ingress_time": {
+          "name": "ingress_time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "egress_time": {
+          "name": "egress_time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "grand_total": {
+          "name": "grand_total",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0.00'"
+        },
+        "pdf_generated_flag": {
+          "name": "pdf_generated_flag",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "pdf_file_path": {
+          "name": "pdf_file_path",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "special_instructions": {
+          "name": "special_instructions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by_user_id": {
+          "name": "created_by_user_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "f_cpm_orders_client_id_d_cpm_clients_id_fk": {
+          "name": "f_cpm_orders_client_id_d_cpm_clients_id_fk",
+          "tableFrom": "f_cpm_orders",
+          "tableTo": "d_cpm_clients",
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "f_cpm_orders_venue_id_d_cpm_venues_id_fk": {
+          "name": "f_cpm_orders_venue_id_d_cpm_venues_id_fk",
+          "tableFrom": "f_cpm_orders",
+          "tableTo": "d_cpm_venues",
+          "columnsFrom": [
+            "venue_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "f_cpm_orders_service_type_id_d_cpm_service_types_id_fk": {
+          "name": "f_cpm_orders_service_type_id_d_cpm_service_types_id_fk",
+          "tableFrom": "f_cpm_orders",
+          "tableTo": "d_cpm_service_types",
+          "columnsFrom": [
+            "service_type_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "f_cpm_orders_status_id_d_cpm_order_status_id_fk": {
+          "name": "f_cpm_orders_status_id_d_cpm_order_status_id_fk",
+          "tableFrom": "f_cpm_orders",
+          "tableTo": "d_cpm_order_status",
+          "columnsFrom": [
+            "status_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.d_cpm_service_types": {
+      "name": "d_cpm_service_types",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "service_name": {
+          "name": "service_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "d_cpm_service_types_service_name_unique": {
+          "name": "d_cpm_service_types_service_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "service_name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.d_cpm_users": {
+      "name": "d_cpm_users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "d_cpm_users_username_unique": {
+          "name": "d_cpm_users_username_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "username"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.d_cpm_venues": {
+      "name": "d_cpm_venues",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "venue_name": {
+          "name": "venue_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "capacity": {
+          "name": "capacity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "physical_address": {
+          "name": "physical_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "d_cpm_venues_venue_name_unique": {
+          "name": "d_cpm_venues_venue_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "venue_name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

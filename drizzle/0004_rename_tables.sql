@@ -1,0 +1,14 @@
+ALTER TABLE d_cpm_offices RENAME TO cpm_offices;
+ALTER TABLE d_cpm_clients RENAME TO cpm_clients;
+ALTER TABLE d_cpm_venues RENAME TO cpm_venues;
+ALTER TABLE d_cpm_service_types RENAME TO cpm_service_types;
+ALTER TABLE d_cpm_order_status RENAME TO cpm_order_statuses;
+ALTER TABLE d_cpm_menus RENAME TO cpm_menus;
+ALTER TABLE d_cpm_items RENAME TO cpm_items;
+ALTER TABLE d_cpm_users RENAME TO cpm_users;
+ALTER TABLE bridge_cpm_menu_items RENAME TO cpm_menu_items;
+ALTER TABLE bridge_cpm_order_days RENAME TO cpm_order_days;
+ALTER TABLE bridge_cpm_meal_periods RENAME TO cpm_meal_periods;
+ALTER TABLE bridge_cpm_meal_period_items RENAME TO cpm_meal_period_items;
+ALTER TABLE f_cpm_orders RENAME TO cpm_orders;
+ALTER TABLE f_cpm_order_history RENAME TO cpm_order_history;

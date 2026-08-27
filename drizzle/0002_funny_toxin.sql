@@ -1,0 +1,1 @@
+ALTER TABLE "bridge_cpm_meal_periods" ADD COLUMN "service_time" time;

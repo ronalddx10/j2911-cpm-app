@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: itadakimasu-app
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres_secure_password_123@shared-postgres:5432/itadakimasu_db?schema=public
+      - JWT_SECRET=itadakimasu_secure_jwt_secret_token_key_2026
+      - PDF_OUTPUT_DIR=./public/invoices
+    networks:
+      - netowaku-app-network
+    restart: always
+
+networks:
+  netowaku-app-network:
+    external: true

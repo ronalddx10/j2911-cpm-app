@@ -1,0 +1,1 @@
+ALTER TABLE "f_cpm_orders" ADD COLUMN "pax" integer DEFAULT 10 NOT NULL;
