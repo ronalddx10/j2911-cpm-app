@@ -1,5 +1,4 @@
 # CPM (Catering & Packed Meals) Order Monitoring System
-**Engineering Code Name:** Project Itadakimasu
 
 A centralized, full-stack order monitoring and catering management platform built with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **Tailwind CSS v4**, **PostgreSQL**, and **Drizzle ORM**.
 
