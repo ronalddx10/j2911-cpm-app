@@ -155,8 +155,9 @@ export async function PUT(
         );
       }
     } else {
-      // Even admins cannot rewrite line items on PAID or CANCELLED terminal states
-      if (statusName === 'PAID' || statusName === 'CANCELLED') {
+      // Even admins cannot rewrite line items on COMPLETED, DELIVERED, PAID, or CANCELLED states
+      const lockedAdminStatuses = ['COMPLETED', 'DELIVERED', 'PAID', 'CANCELLED'];
+      if (lockedAdminStatuses.includes(statusName)) {
         return NextResponse.json(
           { success: false, error: { message: `Orders in ${statusName} status are locked and cannot be edited.` } },
           { status: 409 }
@@ -227,25 +228,7 @@ export async function PUT(
     let dbVenueId: bigint | null = null;
     let dbDeliveryAddress: string | null = null;
 
-    if (venueName && venueName.trim() !== '') {
-      const cleanedName = venueName.trim();
-      // Check if exists
-      const existingVenue = await db.select().from(schema.venues).where(sql`lower(${schema.venues.venueName}) = lower(${cleanedName})`).limit(1);
-      if (existingVenue.length > 0) {
-        dbVenueId = existingVenue[0].id;
-        dbDeliveryAddress = existingVenue[0].physicalAddress;
-      } else {
-        // Create new venue dynamically
-        const newVenueAddress = computedAddress || '';
-        const insertedVenues = await db.insert(schema.venues).values({
-          venueName: cleanedName,
-          capacity: 100, // Default capacity
-          physicalAddress: newVenueAddress,
-        }).returning();
-        dbVenueId = insertedVenues[0].id;
-        dbDeliveryAddress = insertedVenues[0].physicalAddress;
-      }
-    } else if (venueId) {
+    if (venueId) {
       if (!/^\d+$/.test(String(venueId))) {
         return NextResponse.json(
           { success: false, error: { message: 'Invalid venue ID format.' } },
@@ -260,7 +243,7 @@ export async function PUT(
         );
       }
       dbVenueId = BigInt(venueId);
-      dbDeliveryAddress = venueList[0].physicalAddress;
+      dbDeliveryAddress = computedAddress || venueList[0].physicalAddress;
     } else {
       if (!computedAddress || computedAddress.trim() === '') {
         return NextResponse.json(

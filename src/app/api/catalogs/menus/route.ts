@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
         .values({
           title,
           description: description || null,
-          baseRate: Number(baseRate).toFixed(2),
+          baseRate: rateNum.toFixed(2),
           isActive: true,
           createdByUserId: BigInt(userId),
         })

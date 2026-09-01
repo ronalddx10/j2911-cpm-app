@@ -41,12 +41,24 @@ export async function PATCH(
 
     const { title, description, baseRate, isActive, itemIds } = await req.json();
 
+    let formattedBaseRate = existingMenu.baseRate;
+    if (baseRate !== undefined && baseRate !== null) {
+      const rateNum = Number(baseRate);
+      if (!Number.isFinite(rateNum) || rateNum < 0) {
+        return NextResponse.json(
+          { success: false, error: { message: 'Base rate must be a valid non-negative number.' } },
+          { status: 400 }
+        );
+      }
+      formattedBaseRate = rateNum.toFixed(2);
+    }
+
     const updatedMenu = await db.transaction(async (tx) => {
       const updatedList = await tx.update(schema.menus)
         .set({
           title: title !== undefined ? title : existingMenu.title,
           description: description !== undefined ? description : existingMenu.description,
-          baseRate: baseRate !== undefined ? Number(baseRate).toFixed(2) : existingMenu.baseRate,
+          baseRate: formattedBaseRate,
           isActive: isActive !== undefined ? Boolean(isActive) : existingMenu.isActive,
           updatedAt: new Date(),
           updatedByUserId: BigInt(userId),

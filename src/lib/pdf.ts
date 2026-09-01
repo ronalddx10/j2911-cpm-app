@@ -43,12 +43,17 @@ function formatTime(timeVal: any): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
-export function generateInvoicePDF(order: any): string {
-  const dir = path.join(process.cwd(), 'public', 'invoices');
+export function getInvoiceStorageDir(): string {
+  const customDir = process.env.PDF_OUTPUT_DIR;
+  const dir = customDir ? path.resolve(/*turbopackIgnore: true*/ process.cwd(), customDir) : path.join(process.cwd(), 'storage', 'invoices');
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
+  return dir;
+}
 
+export function generateInvoicePDF(order: any): string {
+  const dir = getInvoiceStorageDir();
   const filename = `invoice_${order.id}.pdf`;
   const filepath = path.join(dir, filename);
 
@@ -418,10 +423,7 @@ export function generateInvoicePDF(order: any): string {
 }
 
 export function generateKitchenPDF(order: any): string {
-  const dir = path.join(process.cwd(), 'public', 'invoices');
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+  const dir = getInvoiceStorageDir();
 
   const filename = `kitchen_production_${order.id}.pdf`;
   const filepath = path.join(dir, filename);

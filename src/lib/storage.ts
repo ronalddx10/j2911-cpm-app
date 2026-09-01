@@ -8,10 +8,18 @@ export interface SavedFileResult {
   mimeType: string;
 }
 
+export function getUploadStorageDir(orderId: string | number): string {
+  const uploadDir = path.join(process.cwd(), 'storage', 'uploads', 'orders', String(orderId));
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+  return uploadDir;
+}
+
 /**
  * Modular Storage Driver
- * Currently stores files on the local filesystem under public/uploads/orders/
- * Designed to easily interface with Google Cloud Storage (GCP) or AWS S3 in production.
+ * Stores files securely outside public directory under storage/uploads/orders/
+ * Accessible only through authenticated API routes.
  */
 export async function saveOrderAttachmentFile(
   orderId: string | number,
@@ -21,10 +29,7 @@ export async function saveOrderAttachmentFile(
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'orders', String(orderId));
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
+  const uploadDir = getUploadStorageDir(orderId);
 
   const timestamp = Date.now();
   const sanitizedOriginal = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
@@ -33,11 +38,11 @@ export async function saveOrderAttachmentFile(
 
   fs.writeFileSync(diskPath, buffer);
 
-  const publicUrl = `/uploads/orders/${orderId}/${safeFilename}`;
+  const secureApiUrl = `/api/orders/${orderId}/attachments/file/${encodeURIComponent(safeFilename)}`;
 
   return {
     fileName: file.name,
-    filePath: publicUrl,
+    filePath: secureApiUrl,
     fileSize: buffer.length,
     mimeType: file.type || 'application/octet-stream',
   };

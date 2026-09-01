@@ -4,7 +4,7 @@ import * as schema from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import fs from 'fs';
 import path from 'path';
-import { generateKitchenPDF } from '@/lib/pdf';
+import { generateKitchenPDF, getInvoiceStorageDir } from '@/lib/pdf';
 
 export async function GET(
   req: NextRequest,
@@ -62,11 +62,21 @@ export async function GET(
       );
     }
 
+    // Role / Ownership check
+    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Not authorized to access this kitchen production sheet.' } },
+        { status: 403 }
+      );
+    }
 
+    const dir = getInvoiceStorageDir();
+    const filename = `kitchen_production_${order.id}.pdf`;
+    const filepath = path.join(dir, filename);
 
-    // Generate or fetch the Kitchen PDF path
-    const pdfUrlPath = generateKitchenPDF(order);
-    const filepath = path.join(process.cwd(), 'public', pdfUrlPath);
+    if (!fs.existsSync(filepath)) {
+      generateKitchenPDF(order);
+    }
 
     if (!fs.existsSync(filepath)) {
       return NextResponse.json(

@@ -4,9 +4,25 @@ import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { verifyPassword } from '@/lib/auth';
 import { encryptSession } from '@/lib/auth-jwt';
+import { checkRateLimit } from '@/lib/rate-limiter';
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('x-real-ip') || 'login-ip';
+    const rateCheck = checkRateLimit(`login:${ip}`, 10, 60 * 1000); // Max 10 attempts per minute per IP
+
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: { message: `Too many login attempts. Please try again in ${rateCheck.retryAfterSeconds} seconds.` } },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateCheck.retryAfterSeconds),
+          },
+        }
+      );
+    }
+
     const { username, password } = await req.json();
 
     if (!username || !password) {

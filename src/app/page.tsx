@@ -359,28 +359,6 @@ export default function Home() {
                   Access Console <ArrowRight className="w-4 h-4 ml-2" />
                 </button>
               </form>
-
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-8 border-t border-slate-200 dark:border-slate-800 pt-6">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Development Test Accounts:</p>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div
-                      onClick={() => { setUsernameInput('user'); setPasswordInput('user123'); }}
-                      className="bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-800 cursor-pointer transition-colors"
-                    >
-                      <p className="font-bold text-blue-600 dark:text-sky-400">Staff User</p>
-                      <p className="text-slate-500 mt-1 font-mono">user / user123</p>
-                    </div>
-                    <div
-                      onClick={() => { setUsernameInput('admin'); setPasswordInput('admin123'); }}
-                      className="bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-800 cursor-pointer transition-colors"
-                    >
-                      <p className="font-bold text-emerald-600 dark:text-emerald-400">Admin Lead</p>
-                      <p className="text-slate-500 mt-1 font-mono">admin / admin123</p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </main>
         ) : (

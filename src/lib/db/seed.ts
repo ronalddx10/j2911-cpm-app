@@ -165,10 +165,6 @@ async function main() {
         unitPrice: (data as any).unitPrice || '0.00',
       }).returning();
       item = inserted[0];
-    } else {
-      await db.update(schema.items)
-        .set({ category: data.category, unitPrice: (data as any).unitPrice || '0.00' })
-        .where(eq(schema.items.id, item.id));
     }
     itemsMap[item.itemName] = item;
   }
@@ -244,23 +240,16 @@ async function main() {
         isActive: true,
       }).returning();
       menu = inserted[0];
-    } else {
-      await db.update(schema.menus)
-        .set({ description: data.description, baseRate: data.baseRate })
-        .where(eq(schema.menus.id, menu.id));
-    }
 
-    // Clear existing links
-    await db.delete(schema.menuItems).where(eq(schema.menuItems.menuId, menu.id));
-
-    // Create links
-    for (const name of data.itemNames) {
-      const item = itemsMap[name];
-      if (item) {
-        await db.insert(schema.menuItems).values({
-          menuId: menu.id,
-          itemId: item.id,
-        });
+      // Create links for newly seeded menu
+      for (const name of data.itemNames) {
+        const item = itemsMap[name];
+        if (item) {
+          await db.insert(schema.menuItems).values({
+            menuId: menu.id,
+            itemId: item.id,
+          });
+        }
       }
     }
   }

@@ -48,21 +48,18 @@ export async function POST(
       );
     }
 
-    // Attachment verification (P1-5 fix): Confirm signed delivery receipt is attached
-    const sdrAttachment = await db.query.orderAttachments.findFirst({
-      where: eq(schema.orderAttachments.orderId, orderId),
-    });
-
+    // Attachment verification (P1-5 fix): Confirm approved signed delivery receipt is attached
     const hasSignedDR = await db.query.orderAttachments.findFirst({
       where: (oa, { and, eq }) => and(
         eq(oa.orderId, orderId),
-        eq(oa.documentType, 'SIGNED_DELIVERY_RECEIPT')
+        eq(oa.documentType, 'SIGNED_DELIVERY_RECEIPT'),
+        eq(oa.isApproved, true)
       ),
     });
 
     if (!hasSignedDR) {
       return NextResponse.json(
-        { success: false, error: { message: 'A Signed Delivery Receipt (SDR) attachment is required before completing this order.' } },
+        { success: false, error: { message: 'An approved Signed Delivery Receipt (SDR) attachment is required before completing this order.' } },
         { status: 400 }
       );
     }

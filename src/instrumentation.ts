@@ -6,7 +6,11 @@ export async function register() {
     const path = await import("path");
 
     console.log("Running migrations on startup...");
-    const connectionString = process.env.DATABASE_URL || "postgres://postgres:postgres_secure_password_123@localhost:5432/itadakimasu_db";
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+      console.warn("DATABASE_URL is not set; skipping startup migrations.");
+      return;
+    }
     const client = new pg.Client({ connectionString });
     try {
       await client.connect();
@@ -78,6 +82,7 @@ export async function register() {
       }
     } catch (err) {
       console.error("Startup migration failed:", err);
+      throw err;
     } finally {
       await client.end();
     }

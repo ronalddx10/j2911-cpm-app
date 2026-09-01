@@ -5,6 +5,11 @@ import { decryptSession } from "./lib/auth-jwt";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Block direct unauthenticated access to storage/upload paths
+  if (pathname.startsWith("/storage") || pathname.startsWith("/uploads") || pathname.startsWith("/invoices")) {
+    return NextResponse.json({ error: { message: "Direct file access forbidden. Please use authenticated API routes." } }, { status: 403 });
+  }
+
   // We only protect api routes, excluding the login API route itself
   const isApiRoute = pathname.startsWith("/api");
   const isLoginRoute = pathname === "/api/auth/login";
@@ -48,5 +53,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: ["/api/:path*", "/storage/:path*", "/uploads/:path*", "/invoices/:path*"],
 };

@@ -37,7 +37,11 @@ export async function GET(req: NextRequest) {
       const statusList = await db.select().from(schema.orderStatuses).where(eq(schema.orderStatuses.statusName, statusFilter)).limit(1);
       const statusRecord = statusList[0];
       if (statusRecord) {
-        whereClause = eq(schema.orders.statusId, statusRecord.id);
+        const statusCondition = eq(schema.orders.statusId, statusRecord.id);
+        whereClause = whereClause ? and(whereClause, statusCondition) : statusCondition;
+      } else {
+        const falseCondition = sql`1 = 0`;
+        whereClause = whereClause ? and(whereClause, falseCondition) : falseCondition;
       }
     }
 
@@ -151,7 +155,7 @@ export async function GET(req: NextRequest) {
     headers.set('Content-Type', 'application/pdf');
     headers.set('Content-Disposition', `attachment; filename="order_report_${Date.now()}.pdf"`);
 
-    return new NextResponse(Buffer.from(pdfString, 'binary'), {
+    return new NextResponse(Buffer.from(pdfString, 'utf-8'), {
       status: 200,
       headers
     });

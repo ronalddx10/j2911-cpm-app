@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     headers.set('Content-Type', 'application/pdf');
     headers.set('Content-Disposition', `attachment; filename="menu_items_report_${Date.now()}.pdf"`);
 
-    return new NextResponse(Buffer.from(pdfString, 'binary'), {
+    return new NextResponse(Buffer.from(pdfString, 'utf-8'), {
       status: 200,
       headers
     });

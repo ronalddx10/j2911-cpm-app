@@ -1,10 +1,11 @@
 -- Migration 0007: Add order attachments table, granular address columns, and database performance indexes
 
--- 1. Ensure new client columns exist
+-- 1. Ensure new client columns exist and normalize legacy client types
 ALTER TABLE cpm_clients ADD COLUMN IF NOT EXISTS secondary_contact_name varchar;
 ALTER TABLE cpm_clients ADD COLUMN IF NOT EXISTS secondary_contact_phone varchar;
 ALTER TABLE cpm_clients ADD COLUMN IF NOT EXISTS secondary_contact_email varchar;
 ALTER TABLE cpm_clients ADD COLUMN IF NOT EXISTS location text;
+UPDATE cpm_clients SET client_type = 'COMPANY' WHERE client_type = 'ORGANIZATION';
 
 -- 2. Ensure new order columns exist
 ALTER TABLE cpm_orders ADD COLUMN IF NOT EXISTS event_name varchar;

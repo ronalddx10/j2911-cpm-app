@@ -10,7 +10,8 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   const userId = req.headers.get('x-user-id');
-  if (!userId) {
+  const role = req.headers.get('x-role');
+  if (!userId || !role) {
     return NextResponse.json(
       { success: false, error: { message: 'Not authorized.' } },
       { status: 401 }
@@ -20,6 +21,28 @@ export async function GET(
   try {
     const { id } = await context.params;
     const orderId = BigInt(id);
+
+    const order = await db.query.orders.findFirst({
+      where: eq(schema.orders.id, orderId),
+      columns: {
+        id: true,
+        createdByUserId: true,
+      },
+    });
+
+    if (!order) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Order not found.' } },
+        { status: 404 }
+      );
+    }
+
+    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Not authorized to access attachments for this order.' } },
+        { status: 403 }
+      );
+    }
 
     const attachments = await db.query.orderAttachments.findMany({
       where: eq(schema.orderAttachments.orderId, orderId),
@@ -61,7 +84,7 @@ export async function POST(
 ) {
   const userId = req.headers.get('x-user-id');
   const role = req.headers.get('x-role');
-  if (!userId) {
+  if (!userId || !role) {
     return NextResponse.json(
       { success: false, error: { message: 'Not authorized.' } },
       { status: 401 }
@@ -84,6 +107,14 @@ export async function POST(
       );
     }
 
+    // Role / Ownership check
+    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Not authorized to upload attachments for this order.' } },
+        { status: 403 }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     const documentType = (formData.get('documentType') as string) || 'PURCHASE_ORDER';
@@ -91,6 +122,28 @@ export async function POST(
     if (!file) {
       return NextResponse.json(
         { success: false, error: { message: 'No file uploaded.' } },
+        { status: 400 }
+      );
+    }
+
+    const allowedMimeTypes = ['application/pdf', 'image/png', 'image/jpeg'];
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Invalid file type. Only PDF, PNG, and JPEG files are allowed.' } },
+        { status: 400 }
+      );
+    }
+
+    const maxSizeBytes = 10 * 1024 * 1024; // 10 MB
+    if (file.size === 0) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Uploaded file cannot be empty.' } },
+        { status: 400 }
+      );
+    }
+    if (file.size > maxSizeBytes) {
+      return NextResponse.json(
+        { success: false, error: { message: 'File size exceeds the 10 MB limit.' } },
         { status: 400 }
       );
     }

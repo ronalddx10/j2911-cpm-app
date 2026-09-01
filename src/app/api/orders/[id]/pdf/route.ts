@@ -4,7 +4,7 @@ import * as schema from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import fs from 'fs';
 import path from 'path';
-import { generateInvoicePDF } from '@/lib/pdf';
+import { generateInvoicePDF, getInvoiceStorageDir } from '@/lib/pdf';
 
 export async function GET(
   req: NextRequest,
@@ -71,19 +71,19 @@ export async function GET(
       );
     }
 
-    let pdfPath = order.pdfFilePath;
-    let filepath = pdfPath ? path.join(process.cwd(), 'public', pdfPath) : '';
+    const dir = getInvoiceStorageDir();
+    const filename = `invoice_${order.id}.pdf`;
+    const filepath = path.join(dir, filename);
 
-    if (!pdfPath || !fs.existsSync(filepath)) {
+    if (!fs.existsSync(filepath)) {
       // Regenerate the invoice PDF file dynamically
-      pdfPath = generateInvoicePDF(order);
-      filepath = path.join(process.cwd(), 'public', pdfPath);
+      generateInvoicePDF(order);
 
       // Update order details in the DB
       await db.update(schema.orders)
         .set({
           pdfGeneratedFlag: true,
-          pdfFilePath: pdfPath,
+          pdfFilePath: `/api/orders/${orderId}/pdf`,
           updatedAt: new Date(),
         })
         .where(eq(schema.orders.id, orderId));

@@ -1,10 +1,11 @@
 function getSecretString(): string {
+  const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
   const secret = process.env.SESSION_SECRET || process.env.JWT_SECRET;
   if (!secret) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("CRITICAL: JWT_SECRET or SESSION_SECRET must be configured in production environment.");
+    if (!isBuildPhase) {
+      throw new Error("CRITICAL: JWT_SECRET or SESSION_SECRET must be configured.");
     }
-    return "itadakimasu_secure_jwt_dev_secret_key_only";
+    return "build_placeholder_secret_key_only";
   }
   return secret;
 }

@@ -296,23 +296,7 @@ export async function POST(req: NextRequest) {
     let dbVenueId: bigint | null = null;
     let dbDeliveryAddress: string | null = null;
 
-    if (venueName && venueName.trim() !== '') {
-      const cleanedName = venueName.trim();
-      const existingVenue = await db.select().from(schema.venues).where(sql`lower(${schema.venues.venueName}) = lower(${cleanedName})`).limit(1);
-      if (existingVenue.length > 0) {
-        dbVenueId = existingVenue[0].id;
-        dbDeliveryAddress = existingVenue[0].physicalAddress;
-      } else {
-        const newVenueAddress = computedAddress || '';
-        const insertedVenues = await db.insert(schema.venues).values({
-          venueName: cleanedName,
-          capacity: 100,
-          physicalAddress: newVenueAddress,
-        }).returning();
-        dbVenueId = insertedVenues[0].id;
-        dbDeliveryAddress = insertedVenues[0].physicalAddress;
-      }
-    } else if (venueId) {
+    if (venueId) {
       if (!/^\d+$/.test(String(venueId))) {
         return NextResponse.json(
           { success: false, error: { message: 'Invalid venue ID format.' } },
@@ -327,7 +311,7 @@ export async function POST(req: NextRequest) {
         );
       }
       dbVenueId = BigInt(venueId);
-      dbDeliveryAddress = venueList[0].physicalAddress;
+      dbDeliveryAddress = computedAddress || venueList[0].physicalAddress;
     } else {
       if (!computedAddress || computedAddress.trim() === '') {
         return NextResponse.json(
