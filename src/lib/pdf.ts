@@ -419,7 +419,7 @@ export function generateInvoicePDF(order: any): string {
   const pdfTemplate = body + xrefLines.join('\n') + '\n' + trailer;
 
   fs.writeFileSync(filepath, pdfTemplate, 'utf-8');
-  return `/invoices/${filename}`;
+  return `/api/orders/${order.id}/pdf`;
 }
 
 export function generateKitchenPDF(order: any): string {
@@ -723,7 +723,7 @@ export function generateKitchenPDF(order: any): string {
   const pdfTemplate = body + xrefLines.join('\n') + '\n' + trailer;
 
   fs.writeFileSync(filepath, pdfTemplate, 'utf-8');
-  return `/invoices/${filename}`;
+  return `/api/orders/${order.id}/kitchen-pdf`;
 }
 
 export function assemblePDFContent(streams: string[], isLandscape = false): string {

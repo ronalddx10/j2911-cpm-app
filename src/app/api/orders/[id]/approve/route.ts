@@ -88,10 +88,9 @@ export async function POST(
       );
     }
 
-    // 1. Generate the PDF invoice file
-    const pdfPath = generateInvoicePDF(order);
+    const pdfPath = `/api/orders/${order.id}/pdf`;
 
-    // 2. Perform DB update inside a transaction
+    // 1. Perform DB update inside a transaction
     const updatedOrder = await db.transaction(async (tx) => {
       const updatedList = await tx.update(schema.orders)
         .set({
@@ -115,6 +114,9 @@ export async function POST(
 
       return updatedList[0];
     });
+
+    // 2. Generate the PDF invoice file after transaction commit
+    generateInvoicePDF(order);
 
     return NextResponse.json({
       success: true,

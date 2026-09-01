@@ -8,27 +8,31 @@ import { checkRateLimit } from '@/lib/rate-limiter';
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('x-real-ip') || 'login-ip';
-    const rateCheck = checkRateLimit(`login:${ip}`, 10, 60 * 1000); // Max 10 attempts per minute per IP
-
-    if (!rateCheck.allowed) {
-      return NextResponse.json(
-        { success: false, error: { message: `Too many login attempts. Please try again in ${rateCheck.retryAfterSeconds} seconds.` } },
-        {
-          status: 429,
-          headers: {
-            'Retry-After': String(rateCheck.retryAfterSeconds),
-          },
-        }
-      );
-    }
-
     const { username, password } = await req.json();
 
     if (!username || !password) {
       return NextResponse.json(
         { success: false, error: { message: 'Username and password are required.' } },
         { status: 400 }
+      );
+    }
+
+    const normalizedUsername = String(username).trim().toLowerCase();
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('x-real-ip') || 'login-ip';
+
+    const userRateCheck = checkRateLimit(`login:user:${normalizedUsername}`, 5, 60 * 1000); // Max 5 attempts per min per username
+    const ipRateCheck = checkRateLimit(`login:ip:${ip}`, 20, 60 * 1000); // Max 20 attempts per min per IP
+
+    if (!userRateCheck.allowed || !ipRateCheck.allowed) {
+      const retryAfterSeconds = Math.max(userRateCheck.retryAfterSeconds, ipRateCheck.retryAfterSeconds);
+      return NextResponse.json(
+        { success: false, error: { message: `Too many login attempts. Please try again in ${retryAfterSeconds} seconds.` } },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(retryAfterSeconds),
+          },
+        }
       );
     }
 

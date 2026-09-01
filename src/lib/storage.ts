@@ -21,18 +21,17 @@ export function getUploadStorageDir(orderId: string | number): string {
  * Stores files securely outside public directory under storage/uploads/orders/
  * Accessible only through authenticated API routes.
  */
-export async function saveOrderAttachmentFile(
+export async function saveOrderAttachmentBuffer(
   orderId: string | number,
-  file: File,
+  originalFilename: string,
+  buffer: Buffer,
+  mimeType: string,
   prefix: string = 'doc'
 ): Promise<SavedFileResult> {
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
   const uploadDir = getUploadStorageDir(orderId);
 
   const timestamp = Date.now();
-  const sanitizedOriginal = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+  const sanitizedOriginal = path.basename(originalFilename).replace(/[^a-zA-Z0-9.-]/g, '_');
   const safeFilename = `${prefix}_${timestamp}_${sanitizedOriginal}`;
   const diskPath = path.join(uploadDir, safeFilename);
 
@@ -41,9 +40,19 @@ export async function saveOrderAttachmentFile(
   const secureApiUrl = `/api/orders/${orderId}/attachments/file/${encodeURIComponent(safeFilename)}`;
 
   return {
-    fileName: file.name,
+    fileName: originalFilename,
     filePath: secureApiUrl,
     fileSize: buffer.length,
-    mimeType: file.type || 'application/octet-stream',
+    mimeType,
   };
+}
+
+export async function saveOrderAttachmentFile(
+  orderId: string | number,
+  file: File,
+  prefix: string = 'doc'
+): Promise<SavedFileResult> {
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  return saveOrderAttachmentBuffer(orderId, file.name, buffer, file.type || 'application/octet-stream', prefix);
 }

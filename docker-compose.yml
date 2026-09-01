@@ -10,6 +10,8 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
       - PDF_OUTPUT_DIR=${PDF_OUTPUT_DIR:-./storage/invoices}
+    volumes:
+      - ./storage:/app/storage
     networks:
       - netowaku-app-network
     restart: always

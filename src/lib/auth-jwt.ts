@@ -1,11 +1,7 @@
 function getSecretString(): string {
-  const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
   const secret = process.env.SESSION_SECRET || process.env.JWT_SECRET;
   if (!secret) {
-    if (!isBuildPhase) {
-      throw new Error("CRITICAL: JWT_SECRET or SESSION_SECRET must be configured.");
-    }
-    return "build_placeholder_secret_key_only";
+    throw new Error("CRITICAL: JWT_SECRET or SESSION_SECRET must be configured.");
   }
   return secret;
 }
@@ -75,7 +71,16 @@ export async function decryptSession(text: string): Promise<SessionData | null> 
       encryptedData as any
     );
 
-    return JSON.parse(bufferToString(decryptedBuffer));
+    const session: SessionData = JSON.parse(bufferToString(decryptedBuffer));
+    if (!session || typeof session.createdAt !== 'number') return null;
+
+    // Verify session age (12 hours check, matching 12h policy)
+    const isExpired = Date.now() - session.createdAt > 12 * 60 * 60 * 1000;
+    if (isExpired) {
+      return null;
+    }
+
+    return session;
   } catch (error) {
     return null;
   }

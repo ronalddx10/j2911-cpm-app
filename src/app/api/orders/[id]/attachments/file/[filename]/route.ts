@@ -66,7 +66,7 @@ export async function GET(
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': mimeType,
-        'Content-Disposition': `inline; filename="${sanitizedFilename}"`,
+        'Content-Disposition': `attachment; filename="${sanitizedFilename}"`,
       },
     });
   } catch (error: any) {

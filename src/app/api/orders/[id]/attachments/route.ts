@@ -3,7 +3,8 @@ import { db } from '@/lib/db/db';
 import * as schema from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { serializeBigInt } from '@/lib/serialize';
-import { saveOrderAttachmentFile } from '@/lib/storage';
+import { saveOrderAttachmentBuffer } from '@/lib/storage';
+import path from 'path';
 
 export async function GET(
   req: NextRequest,
@@ -126,24 +127,50 @@ export async function POST(
       );
     }
 
-    const allowedMimeTypes = ['application/pdf', 'image/png', 'image/jpeg'];
-    if (!allowedMimeTypes.includes(file.type)) {
+    const ext = path.extname(file.name).toLowerCase();
+    const allowedExtensions = ['.pdf', '.png', '.jpg', '.jpeg'];
+    if (!allowedExtensions.includes(ext)) {
       return NextResponse.json(
-        { success: false, error: { message: 'Invalid file type. Only PDF, PNG, and JPEG files are allowed.' } },
+        { success: false, error: { message: 'Invalid file extension. Only .pdf, .png, .jpg, and .jpeg files are allowed.' } },
         { status: 400 }
       );
     }
 
-    const maxSizeBytes = 10 * 1024 * 1024; // 10 MB
-    if (file.size === 0) {
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    if (buffer.length === 0) {
       return NextResponse.json(
         { success: false, error: { message: 'Uploaded file cannot be empty.' } },
         { status: 400 }
       );
     }
-    if (file.size > maxSizeBytes) {
+
+    const maxSizeBytes = 10 * 1024 * 1024; // 10 MB
+    if (buffer.length > maxSizeBytes) {
       return NextResponse.json(
         { success: false, error: { message: 'File size exceeds the 10 MB limit.' } },
+        { status: 400 }
+      );
+    }
+
+    // Sniff magic bytes to ensure file content matches claimed type
+    let verifiedMimeType: string | null = null;
+    const isPDF = buffer.length >= 4 && buffer.slice(0, 4).toString('ascii') === '%PDF';
+    const isPNG = buffer.length >= 8 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+    const isJPEG = buffer.length >= 3 && buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+
+    if (isPDF && ext === '.pdf') {
+      verifiedMimeType = 'application/pdf';
+    } else if (isPNG && ext === '.png') {
+      verifiedMimeType = 'image/png';
+    } else if (isJPEG && (ext === '.jpg' || ext === '.jpeg')) {
+      verifiedMimeType = 'image/jpeg';
+    }
+
+    if (!verifiedMimeType) {
+      return NextResponse.json(
+        { success: false, error: { message: 'File content does not match the expected format. Only authentic PDF, PNG, and JPEG files are allowed.' } },
         { status: 400 }
       );
     }
@@ -156,8 +183,8 @@ export async function POST(
       );
     }
 
-    // Save file locally using storage driver
-    const saved = await saveOrderAttachmentFile(id, file, documentType.toLowerCase());
+    // Save file locally using storage driver with verified mimeType
+    const saved = await saveOrderAttachmentBuffer(id, file.name, buffer, verifiedMimeType, documentType.toLowerCase());
 
     // Auto-approve if uploaded by admin
     const isAdmin = role === 'ADMIN';
