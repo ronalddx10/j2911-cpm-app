@@ -63,6 +63,14 @@ export async function GET(
       );
     }
 
+    // Role / Ownership check
+    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Not authorized to access this invoice.' } },
+        { status: 403 }
+      );
+    }
+
     let pdfPath = order.pdfFilePath;
     let filepath = pdfPath ? path.join(process.cwd(), 'public', pdfPath) : '';
 

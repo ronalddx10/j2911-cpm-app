@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     const user = userList[0];
 
-    const isMatch = verifyPassword(password, user.passwordHash);
+    const isMatch = await verifyPassword(password, user.passwordHash);
     if (!isMatch) {
       return NextResponse.json(
         { success: false, error: { message: 'Invalid credentials.' } },

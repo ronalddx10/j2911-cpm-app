@@ -9,10 +9,18 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const userId = req.headers.get('x-user-id');
-  if (!userId) {
+  const role = req.headers.get('x-role');
+  if (!userId || !role) {
     return NextResponse.json(
       { success: false, error: { message: 'Not authorized.' } },
       { status: 401 }
+    );
+  }
+
+  if (role !== 'ADMIN') {
+    return NextResponse.json(
+      { success: false, error: { message: 'Only administrators can modify catalog items.' } },
+      { status: 403 }
     );
   }
 
@@ -24,6 +32,14 @@ export async function PUT(
     if (!itemName || !category) {
       return NextResponse.json(
         { success: false, error: { message: 'Item name and category are required.' } },
+        { status: 400 }
+      );
+    }
+
+    const priceNum = unitPrice != null ? Number(unitPrice) : 0.00;
+    if (!Number.isFinite(priceNum) || priceNum < 0) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Unit price must be a valid non-negative number.' } },
         { status: 400 }
       );
     }

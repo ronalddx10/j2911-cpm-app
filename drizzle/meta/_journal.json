@@ -50,6 +50,13 @@
       "when": 1786285427510,
       "tag": "0006_add_audit_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786285427520,
+      "tag": "0007_add_attachments_and_indexes",
+      "breakpoints": true
     }
   ]
 }

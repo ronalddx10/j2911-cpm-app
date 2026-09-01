@@ -65,7 +65,13 @@ export async function GET(
           with: {
             fromStatus: true,
             toStatus: true,
-            changedByUser: true,
+            changedByUser: {
+              columns: {
+                id: true,
+                username: true,
+                role: true,
+              },
+            },
           },
           orderBy: (oh, { desc }) => [desc(oh.createdAt)],
         },
@@ -76,6 +82,14 @@ export async function GET(
       return NextResponse.json(
         { success: false, error: { message: 'Order not found.' } },
         { status: 404 }
+      );
+    }
+
+    // Ownership / RLS check on GET
+    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Not authorized to view this order.' } },
+        { status: 403 }
       );
     }
 
@@ -129,14 +143,23 @@ export async function PUT(
       );
     }
 
-    // Edit Locking validation
-    // User can only edit if status is DRAFT or FOR_UPDATE
+    // Edit Locking validation: Editable strictly in DRAFT or FOR_UPDATE (P1-4 fix)
+    const statusName = existingOrder.status.statusName;
+    const allowedEditStatuses = ['DRAFT', 'FOR_UPDATE'];
+    
     if (role !== 'ADMIN') {
-      const statusName = existingOrder.status.statusName;
-      if (statusName === 'PENDING_APPROVAL' || statusName === 'APPROVED') {
+      if (!allowedEditStatuses.includes(statusName)) {
         return NextResponse.json(
-          { success: false, error: { message: 'Approved or pending orders cannot be modified.' } },
-          { status: 403 }
+          { success: false, error: { message: `Orders in ${statusName} status cannot be modified. Only DRAFT and FOR_UPDATE orders are editable.` } },
+          { status: 409 }
+        );
+      }
+    } else {
+      // Even admins cannot rewrite line items on PAID or CANCELLED terminal states
+      if (statusName === 'PAID' || statusName === 'CANCELLED') {
+        return NextResponse.json(
+          { success: false, error: { message: `Orders in ${statusName} status are locked and cannot be edited.` } },
+          { status: 409 }
         );
       }
     }

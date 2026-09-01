@@ -5,25 +5,34 @@ import { serializeBigInt } from '@/lib/serialize';
 
 export async function POST(req: NextRequest) {
   const userId = req.headers.get('x-user-id');
-  if (!userId) {
+  const role = req.headers.get('x-role');
+  if (!userId || !role) {
     return NextResponse.json(
       { success: false, error: { message: 'Not authorized.' } },
       { status: 401 }
     );
   }
 
+  if (role !== 'ADMIN') {
+    return NextResponse.json(
+      { success: false, error: { message: 'Only administrators can create catalog menus.' } },
+      { status: 403 }
+    );
+  }
+
   try {
     const { title, description, baseRate, itemIds } = await req.json();
-    if (!title || !baseRate) {
+    if (!title || baseRate == null) {
       return NextResponse.json(
         { success: false, error: { message: 'Menu title and base rate are required.' } },
         { status: 400 }
       );
     }
 
-    if (Number(baseRate) < 0) {
+    const rateNum = Number(baseRate);
+    if (!Number.isFinite(rateNum) || rateNum < 0) {
       return NextResponse.json(
-        { success: false, error: { message: 'Base rate cannot be negative.' } },
+        { success: false, error: { message: 'Base rate must be a valid non-negative number.' } },
         { status: 400 }
       );
     }

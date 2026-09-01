@@ -6,39 +6,6 @@ import { eq, sql } from 'drizzle-orm';
 async function main() {
   console.log('Seeding database via Drizzle...');
 
-  // Auto-Migrations for New Columns and Attachments Table
-  await db.execute(sql`
-    ALTER TABLE cpm_clients ADD COLUMN IF NOT EXISTS secondary_contact_name varchar;
-    ALTER TABLE cpm_clients ADD COLUMN IF NOT EXISTS secondary_contact_phone varchar;
-    ALTER TABLE cpm_clients ADD COLUMN IF NOT EXISTS secondary_contact_email varchar;
-    
-    UPDATE cpm_clients SET client_type = 'COMPANY' WHERE client_type = 'ORGANIZATION';
-
-    ALTER TABLE cpm_orders ADD COLUMN IF NOT EXISTS event_name varchar;
-    ALTER TABLE cpm_orders ADD COLUMN IF NOT EXISTS unit_number varchar;
-    ALTER TABLE cpm_orders ADD COLUMN IF NOT EXISTS floor_number varchar;
-    ALTER TABLE cpm_orders ADD COLUMN IF NOT EXISTS building_name varchar;
-    ALTER TABLE cpm_orders ADD COLUMN IF NOT EXISTS street_number varchar;
-    ALTER TABLE cpm_orders ADD COLUMN IF NOT EXISTS street_name varchar;
-    ALTER TABLE cpm_orders ADD COLUMN IF NOT EXISTS landmark text;
-
-    CREATE TABLE IF NOT EXISTS cpm_order_attachments (
-      id bigserial PRIMARY KEY,
-      order_id bigint NOT NULL REFERENCES cpm_orders(id) ON DELETE CASCADE,
-      document_type varchar NOT NULL,
-      file_name varchar NOT NULL,
-      file_path varchar NOT NULL,
-      file_size integer NOT NULL,
-      mime_type varchar,
-      is_approved boolean DEFAULT false NOT NULL,
-      approved_by_user_id bigint REFERENCES cpm_users(id) ON DELETE SET NULL,
-      approved_at timestamp,
-      uploaded_by_user_id bigint REFERENCES cpm_users(id) ON DELETE SET NULL,
-      created_at timestamp DEFAULT now() NOT NULL
-    );
-  `);
-  console.log('Verified database schema migrations.');
-
   // 1. Seed Offices
   const officesData = [
     { officeName: 'Finance Dept' },
@@ -337,11 +304,11 @@ async function main() {
     console.log('Clients already exist, skipping.');
   }
 
-  // 8. Seed Users
-  const userPassword = hashPassword('user123');
-  const adminPassword = hashPassword('admin123');
+  // 8. Seed Users (P2-6 Fix: Never overwrite existing live passwords)
+  const userPassword = await hashPassword('user123');
+  const adminPassword = await hashPassword('admin123');
 
-  let testUser = await db.query.users.findFirst({
+  const testUser = await db.query.users.findFirst({
     where: eq(schema.users.username, 'user'),
   });
   if (!testUser) {
@@ -350,13 +317,9 @@ async function main() {
       passwordHash: userPassword,
       role: 'USER',
     });
-  } else {
-    await db.update(schema.users)
-      .set({ passwordHash: userPassword, role: 'USER' })
-      .where(eq(schema.users.id, testUser.id));
   }
 
-  let adminUser = await db.query.users.findFirst({
+  const adminUser = await db.query.users.findFirst({
     where: eq(schema.users.username, 'admin'),
   });
   if (!adminUser) {
@@ -365,10 +328,6 @@ async function main() {
       passwordHash: adminPassword,
       role: 'ADMIN',
     });
-  } else {
-    await db.update(schema.users)
-      .set({ passwordHash: adminPassword, role: 'ADMIN' })
-      .where(eq(schema.users.id, adminUser.id));
   }
   console.log('Seeded users (admin and user).');
 

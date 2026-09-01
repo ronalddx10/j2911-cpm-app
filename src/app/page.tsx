@@ -455,6 +455,9 @@ export default function Home() {
                         <option value="DRAFT">DRAFT</option>
                         <option value="PENDING_APPROVAL">PENDING APPROVAL</option>
                         <option value="APPROVED">APPROVED</option>
+                        <option value="DELIVERED">DELIVERED</option>
+                        <option value="COMPLETED">COMPLETED</option>
+                        <option value="PAID">PAID</option>
                         <option value="FOR_UPDATE">FOR UPDATE</option>
                         <option value="CANCELLED">CANCELLED</option>
                       </select>

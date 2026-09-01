@@ -25,11 +25,18 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const statusFilter = searchParams.get('status');
     const search = searchParams.get('search');
-    const page = Number(searchParams.get('page') || 1);
-    const limit = Number(searchParams.get('limit') || 20);
+    const rawPage = Number(searchParams.get('page') || 1);
+    const rawLimit = Number(searchParams.get('limit') || 20);
+    const page = Math.max(1, isNaN(rawPage) ? 1 : rawPage);
+    const limit = Math.min(100, Math.max(1, isNaN(rawLimit) ? 20 : rawLimit)); // Clamp limit between 1 and 100
     const offset = (page - 1) * limit;
 
     let whereClause: any = undefined;
+
+    // Data Scoping (P1-2 fix): Standard users can only view their own orders; ADMIN can view all orders
+    if (role !== 'ADMIN') {
+      whereClause = eq(schema.orders.createdByUserId, BigInt(userId));
+    }
 
 
 
@@ -156,8 +163,20 @@ export async function GET(req: NextRequest) {
         status: true,
         attachments: {
           with: {
-            approvedByUser: true,
-            uploadedByUser: true,
+            approvedByUser: {
+              columns: {
+                id: true,
+                username: true,
+                role: true,
+              },
+            },
+            uploadedByUser: {
+              columns: {
+                id: true,
+                username: true,
+                role: true,
+              },
+            },
           },
           orderBy: (oa, { desc }) => [desc(oa.createdAt)],
         },

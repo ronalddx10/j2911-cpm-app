@@ -56,10 +56,36 @@ export default async function OrderViewPage({ params }: PageProps) {
         },
         orderBy: (od, { asc }) => [asc(od.eventDate)],
       },
+      attachments: {
+        with: {
+          approvedByUser: {
+            columns: {
+              id: true,
+              username: true,
+              role: true,
+            },
+          },
+          uploadedByUser: {
+            columns: {
+              id: true,
+              username: true,
+              role: true,
+            },
+          },
+        },
+        orderBy: (oa, { desc }) => [desc(oa.createdAt)],
+      },
       history: {
         with: {
           fromStatus: true,
           toStatus: true,
+          changedByUser: {
+            columns: {
+              id: true,
+              username: true,
+              role: true,
+            },
+          },
         },
         orderBy: (oh, { desc }) => [desc(oh.createdAt)],
       },

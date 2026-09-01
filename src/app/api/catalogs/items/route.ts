@@ -50,10 +50,18 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const userId = req.headers.get('x-user-id');
-  if (!userId) {
+  const role = req.headers.get('x-role');
+  if (!userId || !role) {
     return NextResponse.json(
       { success: false, error: { message: 'Not authorized.' } },
       { status: 401 }
+    );
+  }
+
+  if (role !== 'ADMIN') {
+    return NextResponse.json(
+      { success: false, error: { message: 'Only administrators can create catalog items.' } },
+      { status: 403 }
     );
   }
 
@@ -62,6 +70,14 @@ export async function POST(req: NextRequest) {
     if (!itemName || !category) {
       return NextResponse.json(
         { success: false, error: { message: 'Item name and category are required.' } },
+        { status: 400 }
+      );
+    }
+
+    const priceNum = unitPrice != null ? Number(unitPrice) : 0.00;
+    if (!Number.isFinite(priceNum) || priceNum < 0) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Unit price must be a valid non-negative number.' } },
         { status: 400 }
       );
     }

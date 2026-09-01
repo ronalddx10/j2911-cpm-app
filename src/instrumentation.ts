@@ -11,15 +11,14 @@ export async function register() {
     try {
       await client.connect();
 
-      // Ensure the location column exists on cpm_clients, fixing potential migration table schema drift
-      await client.query(`
-        ALTER TABLE cpm_clients ADD COLUMN IF NOT EXISTS location text;
-      `);
-      console.log("Database schema pre-check passed successfully.");
-
       const db = drizzle(client);
       await migrate(db, { migrationsFolder: path.join(process.cwd(), "drizzle") });
       console.log("Startup migrations applied successfully!");
+
+      // Ensure the location column exists on cpm_clients if needed
+      await client.query(`
+        ALTER TABLE cpm_clients ADD COLUMN IF NOT EXISTS location text;
+      `);
 
       // Data migration to merge REJECTED and WITHDRAWN statuses into CANCELLED
       console.log("Running data migration for order statuses...");

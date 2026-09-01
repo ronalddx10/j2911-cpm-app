@@ -20,11 +20,18 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search');
     const month = searchParams.get('month');
     const year = searchParams.get('year');
-    const page = searchParams.get('page') ? Number(searchParams.get('page')) : null;
-    const limit = searchParams.get('limit') ? Number(searchParams.get('limit')) : null;
-    const offset = page && limit ? (page - 1) * limit : undefined;
+    const rawLimit = searchParams.get('limit') ? Number(searchParams.get('limit')) : 100;
+    const limit = Math.min(500, Math.max(1, isNaN(rawLimit) ? 100 : rawLimit)); // Cap limit between 1 and 500
+    const rawPage = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
+    const page = Math.max(1, isNaN(rawPage) ? 1 : rawPage);
+    const offset = (page - 1) * limit;
 
     let whereClause: any = undefined;
+
+    // Data Scoping: Non-admin users can only generate reports for their own orders
+    if (role !== 'ADMIN') {
+      whereClause = eq(schema.orders.createdByUserId, BigInt(userId));
+    }
 
     if (statusFilter && statusFilter !== 'ALL') {
       const statusList = await db.select().from(schema.orderStatuses).where(eq(schema.orderStatuses.statusName, statusFilter)).limit(1);

@@ -24,8 +24,20 @@ export async function GET(
     const attachments = await db.query.orderAttachments.findMany({
       where: eq(schema.orderAttachments.orderId, orderId),
       with: {
-        approvedByUser: true,
-        uploadedByUser: true,
+        approvedByUser: {
+          columns: {
+            id: true,
+            username: true,
+            role: true,
+          },
+        },
+        uploadedByUser: {
+          columns: {
+            id: true,
+            username: true,
+            role: true,
+          },
+        },
       },
       orderBy: [desc(schema.orderAttachments.createdAt)],
     });

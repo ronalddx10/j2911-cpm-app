@@ -1,5 +1,13 @@
-// Use the standard Web Cryptography API (crypto.subtle) which is supported in both Node.js and Next.js Edge Runtime.
-const ENCRYPTION_KEY_STRING = process.env.SESSION_SECRET || process.env.JWT_SECRET || "itadakimasu_secure_jwt_secret_token_key_2026";
+function getSecretString(): string {
+  const secret = process.env.SESSION_SECRET || process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("CRITICAL: JWT_SECRET or SESSION_SECRET must be configured in production environment.");
+    }
+    return "itadakimasu_secure_jwt_dev_secret_key_only";
+  }
+  return secret;
+}
 
 // Convert a string to an array buffer
 function stringToBuffer(str: string): Uint8Array {
@@ -11,12 +19,14 @@ function bufferToString(buf: ArrayBuffer): string {
   return new TextDecoder().decode(buf);
 }
 
-// Get the cryptographic key for AES-GCM
+// Get the cryptographic key for AES-GCM with robust SHA-256 key derivation (P0-2 fix)
 async function getCryptoKey(): Promise<CryptoKey> {
-  const rawKey = stringToBuffer(ENCRYPTION_KEY_STRING.padEnd(32).slice(0, 32));
+  const secret = getSecretString();
+  const secretBytes = stringToBuffer(secret);
+  const keyBytes = new Uint8Array(await crypto.subtle.digest("SHA-256", secretBytes as any));
   return await crypto.subtle.importKey(
     "raw",
-    rawKey as any,
+    keyBytes as any,
     { name: "AES-GCM" },
     false,
     ["encrypt", "decrypt"]

@@ -33,9 +33,36 @@ export async function POST(
       );
     }
 
+    // Role / Ownership check (P1-5 fix)
+    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Not authorized to complete this order.' } },
+        { status: 403 }
+      );
+    }
+
     if (order.status.statusName !== 'DELIVERED') {
       return NextResponse.json(
         { success: false, error: { message: 'Only DELIVERED orders can be marked as COMPLETED.' } },
+        { status: 400 }
+      );
+    }
+
+    // Attachment verification (P1-5 fix): Confirm signed delivery receipt is attached
+    const sdrAttachment = await db.query.orderAttachments.findFirst({
+      where: eq(schema.orderAttachments.orderId, orderId),
+    });
+
+    const hasSignedDR = await db.query.orderAttachments.findFirst({
+      where: (oa, { and, eq }) => and(
+        eq(oa.orderId, orderId),
+        eq(oa.documentType, 'SIGNED_DELIVERY_RECEIPT')
+      ),
+    });
+
+    if (!hasSignedDR) {
+      return NextResponse.json(
+        { success: false, error: { message: 'A Signed Delivery Receipt (SDR) attachment is required before completing this order.' } },
         { status: 400 }
       );
     }

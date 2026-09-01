@@ -52,9 +52,10 @@ export function generateInvoicePDF(order: any): string {
   const filename = `invoice_${order.id}.pdf`;
   const filepath = path.join(dir, filename);
 
-  const clientName = order.client.clientType === 'ORGANIZATION'
+  const isOrg = ['COMPANY', 'GOVERNMENT', 'NON_PROFIT', 'ORGANIZATION'].includes(order.client?.clientType);
+  const clientName = isOrg && order.client?.organizationName
     ? order.client.organizationName
-    : `${order.client.firstName} ${order.client.lastName}`;
+    : `${order.client?.firstName || ''} ${order.client?.lastName || ''}`.trim() || 'Client';
 
   const ingressStr = formatTime(order.ingressTime);
   const egressStr = formatTime(order.egressTime);
@@ -425,9 +426,10 @@ export function generateKitchenPDF(order: any): string {
   const filename = `kitchen_production_${order.id}.pdf`;
   const filepath = path.join(dir, filename);
 
-  const clientName = order.client?.clientType === 'ORGANIZATION'
+  const isOrg = ['COMPANY', 'GOVERNMENT', 'NON_PROFIT', 'ORGANIZATION'].includes(order.client?.clientType);
+  const clientName = isOrg && order.client?.organizationName
     ? order.client.organizationName
-    : `${order.client?.firstName || ''} ${order.client?.lastName || ''}`;
+    : `${order.client?.firstName || ''} ${order.client?.lastName || ''}`.trim() || 'Client';
 
   const ingressStr = formatTime(order.ingressTime);
   const egressStr = formatTime(order.egressTime);
@@ -833,10 +835,10 @@ export function generateOrderListPDF(orders: any[], filters: any): string {
     pageLines.push(`(CPM ORDER MONITORING SYSTEM - ORDER REPORT) Tj`);
     pageLines.push(`/F1 9 Tf`);
     pageLines.push(`0 -20 Td`);
-    const statusText = filters.status ? `Status: ${filters.status}` : 'Status: ALL';
-    const monthText = filters.month ? `Month: ${filters.month}` : 'Month: ALL';
-    const yearText = filters.year ? `Year: ${filters.year}` : 'Year: ALL';
-    const searchText = filters.search ? `Search: "${filters.search}"` : '';
+    const statusText = escapePDFText(filters.status ? `Status: ${filters.status}` : 'Status: ALL');
+    const monthText = escapePDFText(filters.month ? `Month: ${filters.month}` : 'Month: ALL');
+    const yearText = escapePDFText(filters.year ? `Year: ${filters.year}` : 'Year: ALL');
+    const searchText = filters.search ? `Search: "${escapePDFText(filters.search)}"` : '';
     pageLines.push(`(Filters - ${statusText}  |  ${monthText}  |  ${yearText} ${searchText ? '  |  ' + searchText : ''}) Tj`);
     pageLines.push(`ET`);
 
@@ -869,10 +871,11 @@ export function generateOrderListPDF(orders: any[], filters: any): string {
     let currentY = 420;
 
     pageOrders.forEach((order, idx) => {
-      const clientName = order.client?.clientType === 'ORGANIZATION'
+      const isOrg = ['COMPANY', 'GOVERNMENT', 'NON_PROFIT', 'ORGANIZATION'].includes(order.client?.clientType);
+      const clientName = isOrg && order.client?.organizationName
         ? order.client.organizationName
-        : `${order.client?.firstName || ''} ${order.client?.lastName || ''}`;
-      const escapedClient = escapePDFText(((clientName || '').trim() || 'N/A').substring(0, 18));
+        : `${order.client?.firstName || ''} ${order.client?.lastName || ''}`.trim() || 'N/A';
+      const escapedClient = escapePDFText((clientName.trim() || 'N/A').substring(0, 24));
 
       const deliveryAddress = order.venue
         ? `${order.venue.venueName} (${order.venue.physicalAddress})`

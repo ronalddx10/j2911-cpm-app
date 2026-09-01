@@ -33,6 +33,14 @@ export async function POST(
       );
     }
 
+    // Role / Ownership check (P1-5 fix)
+    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
+      return NextResponse.json(
+        { success: false, error: { message: 'Not authorized to deliver this order.' } },
+        { status: 403 }
+      );
+    }
+
     if (order.status.statusName !== 'APPROVED') {
       return NextResponse.json(
         { success: false, error: { message: 'Only APPROVED orders can be marked as DELIVERED.' } },
