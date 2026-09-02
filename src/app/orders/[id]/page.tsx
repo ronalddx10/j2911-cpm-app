@@ -96,14 +96,6 @@ export default async function OrderViewPage({ params }: PageProps) {
     notFound();
   }
 
-  // RLS Enforcement: staff can only view their own drafts, admins see everything
-  const isOwner = BigInt(session.userId) === orderData.createdByUserId;
-  const isAdmin = session.role === 'ADMIN';
-
-  if (!isAdmin && !isOwner) {
-    redirect('/');
-  }
-
   // 3. Fetch catalogs needed for edit drop-downs (venues, service types, clients, menus)
   const venues = await db.query.venues.findMany();
   const serviceTypes = await db.query.serviceTypes.findMany();

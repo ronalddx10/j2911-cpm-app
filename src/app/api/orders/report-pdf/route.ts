@@ -28,11 +28,6 @@ export async function GET(req: NextRequest) {
 
     let whereClause: any = undefined;
 
-    // Data Scoping: Non-admin users can only generate reports for their own orders
-    if (role !== 'ADMIN') {
-      whereClause = eq(schema.orders.createdByUserId, BigInt(userId));
-    }
-
     if (statusFilter && statusFilter !== 'ALL') {
       const statusList = await db.select().from(schema.orderStatuses).where(eq(schema.orderStatuses.statusName, statusFilter)).limit(1);
       const statusRecord = statusList[0];

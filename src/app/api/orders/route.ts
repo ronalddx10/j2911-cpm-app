@@ -33,11 +33,6 @@ export async function GET(req: NextRequest) {
 
     let whereClause: any = undefined;
 
-    // Data Scoping (P1-2 fix): Standard users can only view their own orders; ADMIN can view all orders
-    if (role !== 'ADMIN') {
-      whereClause = eq(schema.orders.createdByUserId, BigInt(userId));
-    }
-
 
 
     if (statusFilter && statusFilter !== 'ALL') {

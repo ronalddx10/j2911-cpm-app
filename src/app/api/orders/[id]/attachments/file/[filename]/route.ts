@@ -39,13 +39,6 @@ export async function GET(
       );
     }
 
-    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
-      return NextResponse.json(
-        { success: false, error: { message: 'Not authorized to access files for this order.' } },
-        { status: 403 }
-      );
-    }
-
     const uploadDir = getUploadStorageDir(id);
     const diskPath = path.join(uploadDir, sanitizedFilename);
 

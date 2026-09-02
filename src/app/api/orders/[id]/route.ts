@@ -85,14 +85,6 @@ export async function GET(
       );
     }
 
-    // Ownership / RLS check on GET
-    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
-      return NextResponse.json(
-        { success: false, error: { message: 'Not authorized to view this order.' } },
-        { status: 403 }
-      );
-    }
-
     return NextResponse.json({
       success: true,
       data: serializeBigInt(order),

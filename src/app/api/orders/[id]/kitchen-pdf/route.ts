@@ -62,14 +62,6 @@ export async function GET(
       );
     }
 
-    // Role / Ownership check
-    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
-      return NextResponse.json(
-        { success: false, error: { message: 'Not authorized to access this kitchen production sheet.' } },
-        { status: 403 }
-      );
-    }
-
     const dir = getInvoiceStorageDir();
     const filename = `kitchen_production_${order.id}.pdf`;
     const filepath = path.join(dir, filename);

@@ -38,13 +38,6 @@ export async function GET(
       );
     }
 
-    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
-      return NextResponse.json(
-        { success: false, error: { message: 'Not authorized to access attachments for this order.' } },
-        { status: 403 }
-      );
-    }
-
     const attachments = await db.query.orderAttachments.findMany({
       where: eq(schema.orderAttachments.orderId, orderId),
       with: {
@@ -105,14 +98,6 @@ export async function POST(
       return NextResponse.json(
         { success: false, error: { message: 'Order not found.' } },
         { status: 404 }
-      );
-    }
-
-    // Role / Ownership check
-    if (role !== 'ADMIN' && order.createdByUserId !== BigInt(userId)) {
-      return NextResponse.json(
-        { success: false, error: { message: 'Not authorized to upload attachments for this order.' } },
-        { status: 403 }
       );
     }
 
