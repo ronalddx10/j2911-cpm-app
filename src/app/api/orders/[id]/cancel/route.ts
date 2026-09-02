@@ -44,7 +44,7 @@ export async function POST(
 
     // Role-based validations
     if (role === 'ADMIN') {
-      if (!remarks) {
+      if (!remarks || typeof remarks !== 'string' || remarks.trim() === '') {
         return NextResponse.json(
           { success: false, error: { message: 'Remarks explaining the reason for cancellation are required.' } },
           { status: 400 }

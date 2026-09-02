@@ -30,7 +30,7 @@ export async function POST(
     const orderId = BigInt(id);
     const { remarks } = await req.json();
 
-    if (!remarks) {
+    if (!remarks || typeof remarks !== 'string' || remarks.trim() === '') {
       return NextResponse.json(
         { success: false, error: { message: 'Remarks explaining what needs updating are required.' } },
         { status: 400 }
