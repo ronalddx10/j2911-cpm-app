@@ -10,12 +10,16 @@ if (!connectionString) {
   }
 }
 
+const isSSL =
+  process.env.DB_SSL === "true" ||
+  (connectionString ? connectionString.includes("sslmode=require") || connectionString.includes("neon.tech") || connectionString.includes("pooler") : false);
+
 const pool = new pg.Pool({
   connectionString: connectionString || undefined,
   max: 20,
   connectionTimeoutMillis: 5000,
   idleTimeoutMillis: 30000,
-  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: true } : undefined,
+  ssl: isSSL ? { rejectUnauthorized: false } : undefined,
 });
 
 export const db = drizzle(pool, { schema });

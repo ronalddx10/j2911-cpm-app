@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const userList = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    const userList = await db.select().from(users).where(eq(users.username, normalizedUsername)).limit(1);
 
     if (userList.length === 0) {
       return NextResponse.json(
